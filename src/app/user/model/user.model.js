@@ -16,15 +16,19 @@ const userSchema = new Schema(
       lowercase: true,
     },
 
-    password: String,
-
     provider: {
       type: String,
       enum: ["google", "facebook", "local"],
       default: "local",
     },
-    isDeleted: { type: boolean, default: false },
-    isVerified: { type: boolean, default: false },
+    password: {
+      type: String,
+      required: function () {
+        return this.provider === "local";
+      },
+    },
+    isDeleted: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
     dob: Date,
     gender: { type: String, enum: ["male", "female"] },
   },
