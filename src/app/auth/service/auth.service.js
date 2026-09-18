@@ -5,6 +5,8 @@ import { generateOtp } from "../../../common/utils/generateOtp.js";
 import { toMs } from "../../../common/utils/time.js";
 import * as authRepo from "../repository/auth.repo.js";
 import * as otpRepo from "../repository/otp.repo.js";
+import * as userRepo from "../../user/repository/user.repo.js";
+import jwt from "jsonwebtoken";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
@@ -49,6 +51,35 @@ export async function verifyAccount(email, code) {
     error.status = 400;
     throw error;
   }
-  await authRepo.verifyAccount(email);
+  const updatedUser = await userRepo.updateUserByEmail(email, {
+    isVerified: true,
+  });
   await otpRepo.deleteOtp(email);
+  return updatedUser;
+}
+export async function login(email, password) {
+  const user = await authRepo.checkUserByEmail(email);
+  if (!user) {
+    const error = new Error("user doesn't exist");
+    error.status = 404;
+    throw error;
+  }
+  if (user.isVerified === false) {
+    const error = new Error("user isn't verified verified");
+    error.status = 400;
+    throw error;
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    const error = new Error("invaild credintials");
+    error.status = 400;
+    throw error;
+  }
+  return jwt.sign(
+    { id: user._id, email: user.email, name: user.name },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: toMs(1, "hours"),
+    },
+  );
 }
