@@ -44,3 +44,15 @@ export async function login(req, res, next) {
     return next(error);
   }
 }
+export async function sendOtp(req, res, next) {
+  try {
+    const { email } = req.body;
+    await authService.sendOtp(email);
+    return res.status(200).json({
+      success: true,
+      message: "a new email is sent with a new otp",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}

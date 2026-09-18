@@ -65,7 +65,7 @@ export async function login(email, password) {
     throw error;
   }
   if (user.isVerified === false) {
-    const error = new Error("user isn't verified verified");
+    const error = new Error("user isn't verified");
     error.status = 400;
     throw error;
   }
@@ -82,4 +82,21 @@ export async function login(email, password) {
       expiresIn: toMs(1, "hours"),
     },
   );
+}
+export async function sendOtp(email) {
+  const user = await authRepo.checkUserByEmail(email);
+  if (!user) {
+    const error = new Error("user doesn't exist");
+    error.status = 404;
+    throw error;
+  }
+  await otpRepo.deleteOtp(email);
+  const code = generateOtp();
+  await otpRepo.createOtp({
+    code: code,
+    email: user.email,
+    expiresAt: Date.now() + toMs(15, "minutes"),
+  });
+  const htmlContent = getOtpEmailTemplate(code, "resend");
+  await sendEmail(user.email, "New OTP - NGL", htmlContent);
 }

@@ -4,5 +4,5 @@ const authRouter = Router();
 authRouter.post("/register", authController.register);
 authRouter.patch("/verify", authController.verifyAccount);
 authRouter.post("/login", authController.login);
-// authRouter.post("/send-otp");
+authRouter.post("/send-otp", authController.sendOtp);
 export { authRouter };
