@@ -9,13 +9,13 @@ import * as userRepo from "../../user/repository/user.repo.js";
 import * as userErrors from "../../user/errors.js";
 import * as authErrors from "../errors.js";
 import jwt from "jsonwebtoken";
+import { hashPassword, matchPassword } from "../utils.js/hash.js";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
     throw userErrors.userAlreadyExists;
   }
-  const hashedPassword = await bcrypt.hash(userData.password, 12);
-  userData.password = hashedPassword;
+  userData.password = await hashPassword(userData.password);
   const newUser = await authRepo.createUser(userData);
   const code = generateOtp();
   await otpRepo.createOtp({
@@ -57,7 +57,7 @@ export async function login(email, password) {
   if (user.isVerified === false) {
     throw userErrors.userNotVerified;
   }
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await matchPassword(password, user.password);
   if (!isMatch) {
     throw authErrors.passwordNotMatch;
   }
