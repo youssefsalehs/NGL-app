@@ -6,13 +6,13 @@ import { toMs } from "../../../common/utils/time.js";
 import * as authRepo from "../repository/auth.repo.js";
 import * as otpRepo from "../repository/otp.repo.js";
 import * as userRepo from "../../user/repository/user.repo.js";
+import * as userErrors from "../../user/errors.js";
+import * as authErrors from "../errors.js";
 import jwt from "jsonwebtoken";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
-    const error = new Error("user already exists");
-    error.status = 400;
-    throw error;
+    throw userErrors.userAlreadyExists;
   }
   const hashedPassword = await bcrypt.hash(userData.password, 12);
   userData.password = hashedPassword;
@@ -31,25 +31,17 @@ export async function register(userData) {
 export async function verifyAccount(email, code) {
   const user = await authRepo.checkUserByEmail(email);
   if (!user) {
-    const error = new Error("user doesn't exist");
-    error.status = 404;
-    throw error;
+    throw userErrors.userNotFound;
   }
   if (user.isVerified === true) {
-    const error = new Error("user already verified");
-    error.status = 400;
-    throw error;
+    throw userErrors.userAlreadyVerified;
   }
   const otp = await otpRepo.findOtpByEmail(email);
   if (!otp) {
-    const error = new Error("otp expired.");
-    error.status = 400;
-    throw error;
+    throw authErrors.otpExpired;
   }
   if (code !== otp.code) {
-    const error = new Error("wrong otp code");
-    error.status = 400;
-    throw error;
+    throw authErrors.wrongOtp;
   }
   const updatedUser = await userRepo.updateUserByEmail(email, {
     isVerified: true,
@@ -60,20 +52,14 @@ export async function verifyAccount(email, code) {
 export async function login(email, password) {
   const user = await authRepo.checkUserByEmail(email);
   if (!user) {
-    const error = new Error("user doesn't exist");
-    error.status = 404;
-    throw error;
+    throw userErrors.userNotFound;
   }
   if (user.isVerified === false) {
-    const error = new Error("user isn't verified");
-    error.status = 400;
-    throw error;
+    throw userErrors.userNotVerified;
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    const error = new Error("invaild credintials");
-    error.status = 400;
-    throw error;
+    throw authErrors.passwordNotMatch;
   }
   return jwt.sign(
     { id: user._id, email: user.email, name: user.name },
@@ -86,9 +72,7 @@ export async function login(email, password) {
 export async function sendOtp(email) {
   const user = await authRepo.checkUserByEmail(email);
   if (!user) {
-    const error = new Error("user doesn't exist");
-    error.status = 404;
-    throw error;
+    throw userErrors.userNotFound;
   }
   await otpRepo.deleteOtp(email);
   const code = generateOtp();
