@@ -18,7 +18,7 @@ export async function verifyAccount(req, res, next) {
     const { email, code } = req.body;
     const updatedUser = await authService.verifyAccount(email, code);
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "user verified successfully",
       data: updatedUser,

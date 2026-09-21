@@ -1,8 +1,4 @@
-export const otpExpired = new Error("otp expired.");
-otpExpired.status = 400;
-
-export const wrongOtp = new Error("wrong otp code");
-wrongOtp.status = 400;
-
-export const passwordNotMatch = new Error("invaild credintials");
-passwordNotMatch.status = 400;
+import { AppError } from "../../common/error/error";
+export const otpExpired = new AppError("otp expired.", 404);
+export const wrongOtp = new AppError("wrong otp code", 400);
+export const passwordNotMatch = new AppError("invaild credintials", 403);
