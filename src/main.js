@@ -8,6 +8,7 @@ const app = express();
 import { authRouter } from "./app/auth/auth.route.js";
 import { messageRouter } from "./app/message/message.route.js";
 import { userRouter } from "./app/user/user.route.js";
+import { logger } from "./common/logger/logger.js";
 
 app.use(express.json());
 app.use("/api/v1/auth", authRouter);
@@ -17,6 +18,7 @@ app.use("/api/v1/user", userRouter);
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const isOperational = err.isOperational || false;
+  logger.error(err.message, err);
   return res.status(statusCode).json({
     success: false,
     message: isOperational ? err.message : "Something went wrong!",
