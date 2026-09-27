@@ -45,7 +45,7 @@ export async function verifyAccount(email, code) {
   const updatedUser = await userRepo.updateUserByEmail(email, {
     isVerified: true,
   });
-  await otpRepo.deleteOtp(email);
+  await otpRepo.deleteOtpByEmail(email);
   return updatedUser;
 }
 export async function login(email, password) {
@@ -67,7 +67,7 @@ export async function sendOtp(email) {
   if (!user) {
     throw userErrors.userNotFound;
   }
-  await otpRepo.deleteOtp(email);
+  await otpRepo.deleteOtpByEmail(email);
   const code = generateOtp();
   await otpRepo.createOtp({
     code: code,
@@ -76,4 +76,16 @@ export async function sendOtp(email) {
   });
   const htmlContent = getOtpEmailTemplate(code, "resend");
   await sendEmail(user.email, "New OTP - NGL", htmlContent);
+}
+export async function resetPassword(email, code, newPassword) {
+  const otp = await otpRepo.findOtpByEmail(email);
+  if (!otp) {
+    throw authErrors.otpExpired;
+  }
+  if (+otp.code !== +code) {
+    throw authErrors.wrongOtp;
+  }
+  const hashedPassword = await hashPassword(newPassword);
+  await userRepo.updateUserByEmail(email, { password: hashedPassword });
+  await otpRepo.deleteOtpByEmail(email);
 }

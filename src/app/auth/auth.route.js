@@ -5,4 +5,5 @@ authRouter.post("/register", authController.register);
 authRouter.patch("/verify", authController.verifyAccount);
 authRouter.post("/login", authController.login);
 authRouter.post("/send-otp", authController.sendOtp);
+authRouter.patch("/reset-password", authController.resetPassword);
 export { authRouter };

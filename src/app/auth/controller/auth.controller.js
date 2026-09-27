@@ -52,6 +52,18 @@ export async function sendOtp(req, res, next) {
       success: true,
       message: "a new email is sent with a new otp",
     });
+  } catch (error) {}
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    const { email, newPassword, code } = req.body;
+    await authService.resetPassword(email, code, newPassword);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password successfully reset.",
+    });
   } catch (error) {
     return next(error);
   }

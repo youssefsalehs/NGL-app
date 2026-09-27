@@ -9,7 +9,7 @@ export async function findOtpByEmail(email) {
   const Otp = await OTP.findOne({ email: email });
   return Otp;
 }
-export async function deleteOtp(email) {
+export async function deleteOtpByEmail(email) {
   return await OTP.deleteMany({
     email: email,
   });

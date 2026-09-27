@@ -24,4 +24,4 @@ app.use((err, req, res, next) => {
     message: isOperational ? err.message : "Something went wrong!",
   });
 });
-app.listen(PORT, () => console.log(`this app is running on port ${PORT}`));
+app.listen(PORT, () => logger.info(`this app is running on port ${PORT}`));
