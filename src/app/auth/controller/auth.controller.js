@@ -1,8 +1,17 @@
 import { toMs } from "../../../common/utils/time.js";
+import { validate } from "../../../common/validation/validation.js";
+import {
+  loginDto,
+  registerDto,
+  resetPasswordDto,
+  sendOtpDto,
+  verifyAccountDto,
+} from "../dto/auth.dto.js";
 import * as authService from "../service/auth.service.js";
 export async function register(req, res, next) {
   try {
-    const newUser = await authService.register(req.body);
+    const data = validate(registerDto, req.body);
+    const newUser = await authService.register(data);
 
     return res.status(201).json({
       success: true,
@@ -15,7 +24,8 @@ export async function register(req, res, next) {
 }
 export async function verifyAccount(req, res, next) {
   try {
-    const { email, code } = req.body;
+    const data = validate(verifyAccountDto, req.body);
+    const { email, code } = data;
     const updatedUser = await authService.verifyAccount(email, code);
 
     return res.status(200).json({
@@ -29,7 +39,8 @@ export async function verifyAccount(req, res, next) {
 }
 export async function login(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const data = validate(loginDto, req.body);
+    const { email, password } = data;
     const token = await authService.login(email, password);
     res.cookie("access_token", token, {
       httpOnly: true,
@@ -46,7 +57,8 @@ export async function login(req, res, next) {
 }
 export async function sendOtp(req, res, next) {
   try {
-    const { email } = req.body;
+    const data = validate(sendOtpDto, req.body);
+    const { email } = data;
     await authService.sendOtp(email);
     return res.status(200).json({
       success: true,
@@ -57,7 +69,8 @@ export async function sendOtp(req, res, next) {
 
 export async function resetPassword(req, res, next) {
   try {
-    const { email, newPassword, code } = req.body;
+    const data = validate(resetPasswordDto, req.body);
+    const { email, newPassword, code } = data;
     await authService.resetPassword(email, code, newPassword);
 
     return res.status(200).json({
