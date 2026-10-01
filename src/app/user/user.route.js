@@ -7,4 +7,5 @@ userRouter
   .get(guard, userController.getMe)
   .put(guard, userController.updateMe)
   .delete(guard, userController.deleteAccount);
+userRouter.patch("/update-password", guard, userController.updatePassword);
 export { userRouter };

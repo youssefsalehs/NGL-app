@@ -4,3 +4,7 @@ export const updateUserDto = z.object({
   dob: z.coerce.date().optional(),
   gender: z.enum(["male", "female"]).optional(),
 });
+export const updatePasswordDto = z.object({
+  password: z.string().min(8).max(16).trim(),
+  newPassword: z.string().min(8).max(16).trim(),
+});

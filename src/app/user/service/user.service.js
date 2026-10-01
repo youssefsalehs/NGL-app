@@ -1,6 +1,8 @@
 import * as authRepo from "../../auth/repository/auth.repo.js";
 import * as userRepo from "../repository/user.repo.js";
 import { userNotFound } from "../errors.js";
+import { passwordNotMatch } from "../../auth/errors.js";
+import { hashPassword, matchPassword } from "../../auth/utils/hash.js";
 export async function getMe(email) {
   const user = await authRepo.checkUserByEmail(email);
   user.password = undefined;
@@ -19,4 +21,11 @@ export async function deleteAccount(email) {
     throw userNotFound;
   }
   await userRepo.updateUserByEmail(email, { isDeleted: true });
+}
+export async function updatePassword(email, data) {
+  const user = await authRepo.checkUserByEmail(email);
+  const isMatch = await matchPassword(data.password, user.password);
+  if (!isMatch) throw passwordNotMatch;
+  const hashedPassword = await hashPassword(data.newPassword);
+  await userRepo.updateUserByEmail(email, { password: hashedPassword });
 }
