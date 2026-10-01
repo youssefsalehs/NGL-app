@@ -9,6 +9,7 @@ import * as authRepo from "../repository/auth.repo.js";
 import * as otpRepo from "../repository/otp.repo.js";
 import { hashPassword, matchPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/token.js";
+import { verifyGoogleToken } from "../../../common/utils/google-auth.js";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
@@ -92,7 +93,8 @@ export async function resetPassword(email, code, newPassword) {
 
 export async function loginWithGoogle(idToken) {
   const payload = await verifyGoogleToken(idToken);
-  const user = authRepo.checkUserByEmail(payload.email);
+  const user = await authRepo.checkUserByEmail(payload.email);
+  console.log(user);
   if (user) {
     return generateToken({ id: user._id, email: user.email });
   }
