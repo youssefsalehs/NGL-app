@@ -89,3 +89,18 @@ export async function resetPassword(email, code, newPassword) {
   await userRepo.updateUserByEmail(email, { password: hashedPassword });
   await otpRepo.deleteOtpByEmail(email);
 }
+
+export async function loginWithGoogle(idToken) {
+  const payload = await verifyGoogleToken(idToken);
+  const user = authRepo.checkUserByEmail(payload.email);
+  if (user) {
+    return generateToken({ id: user._id, email: user.email });
+  }
+  const newUser = await authRepo.createUser({
+    name: payload.name,
+    email: payload.email,
+    provider: "google",
+    isVerified: true,
+  });
+  return generateToken({ id: newUser._id, email: newUser.email });
+}

@@ -6,4 +6,5 @@ authRouter.patch("/verify", authController.verifyAccount);
 authRouter.post("/login", authController.login);
 authRouter.post("/send-otp", authController.sendOtp);
 authRouter.patch("/reset-password", authController.resetPassword);
+authRouter.post("/google-login", authController.googleLogin);
 export { authRouter };
