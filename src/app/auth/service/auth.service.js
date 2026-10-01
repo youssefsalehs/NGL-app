@@ -57,7 +57,9 @@ export async function login(email, password) {
   if (user.isVerified === false) {
     throw userErrors.userNotVerified;
   }
+
   const isMatch = await matchPassword(password, user.password);
+
   if (!isMatch) {
     throw authErrors.passwordNotMatch;
   }

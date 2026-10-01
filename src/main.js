@@ -7,9 +7,12 @@ import { authRouter } from "./app/auth/auth.route.js";
 import { messageRouter } from "./app/message/message.route.js";
 import { userRouter } from "./app/user/user.route.js";
 import { logger } from "./common/logger/logger.js";
+import cookieParser from "cookie-parser";
+
 const PORT = process.env.PORT || 5000;
 const app = express();
 
+app.use(cookieParser());
 app.use(cors({ origin: ["http://localhost:4200"] }));
 
 app.use(express.json());
@@ -24,6 +27,7 @@ app.use((err, req, res, next) => {
   return res.status(statusCode).json({
     success: false,
     message: isOperational ? err.message : "Something went wrong!",
+    stack: err.stack,
   });
 });
 app.listen(PORT, () => logger.info(`this app is running on port ${PORT}`));
