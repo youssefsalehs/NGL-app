@@ -24,3 +24,12 @@ export async function updateMe(req, res, next) {
     return next(error);
   }
 }
+export async function deleteAccount(req, res, next) {
+  try {
+    const userEmail = req.user.email;
+    await userService.deleteAccount(userEmail);
+    return res.sendStatus(204);
+  } catch (error) {
+    return next(error);
+  }
+}

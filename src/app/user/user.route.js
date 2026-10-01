@@ -5,5 +5,6 @@ const userRouter = Router();
 userRouter
   .route("/me")
   .get(guard, userController.getMe)
-  .put(guard, userController.updateMe);
+  .put(guard, userController.updateMe)
+  .delete(guard, userController.deleteAccount);
 export { userRouter };
