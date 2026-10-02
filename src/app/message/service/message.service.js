@@ -24,8 +24,10 @@ export const createMsg = async (data) => {
   data.isAnonymous = undefined;
   return await messageRepo.createMsg(data);
 };
-export const getSpecificMsg = async (msgId) => {
+export const getSpecificMsg = async (senderId, msgId) => {
   const msg = await messageRepo.getSpecificMsgById(msgId);
+  if (String(msg.sender) !== String(senderId))
+    throw userErrors.userNotAuthorized;
   if (!msg) throw msgErrors.messageNotFound;
   if (msg.isDeleted) throw msgErrors.messageNotFound;
   return msg;
