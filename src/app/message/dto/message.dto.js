@@ -1,0 +1,7 @@
+import { z } from "zod";
+export const createMsgDto = z.object({
+  content: z.string("message content is required.").trim().min(3).max(20),
+  receiver: z.string().min(1, "Receiver is required"),
+  sender: z.string().optional(),
+  isAnonymous: z.boolean(),
+});

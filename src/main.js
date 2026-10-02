@@ -27,6 +27,7 @@ app.use((err, req, res, next) => {
   return res.status(statusCode).json({
     success: false,
     message: isOperational ? err.message : "Something went wrong!",
+    stack: err.stack,
   });
 });
 app.listen(PORT, () => logger.info(`this app is running on port ${PORT}`));

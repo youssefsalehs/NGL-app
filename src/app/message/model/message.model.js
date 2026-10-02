@@ -11,7 +11,7 @@ const messageSchema = new Schema(
 
     receiver: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     sender: { type: Schema.Types.ObjectId, ref: "User" },
-    isDeleted: { type: boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
