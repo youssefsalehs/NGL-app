@@ -3,5 +3,8 @@ import * as messageController from "./controller/message.controller.js";
 import { guard } from "../../common/auth/guard.js";
 const messageRouter = Router();
 messageRouter.route("/").post(messageController.createMsg);
-messageRouter.route("/:msgId").get(guard, messageController.getSpecificMsg);
+messageRouter
+  .route("/:msgId")
+  .get(guard, messageController.getSpecificMsg)
+  .put(guard, messageController.updateMsg);
 export { messageRouter };

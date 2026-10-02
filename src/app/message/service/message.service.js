@@ -26,9 +26,20 @@ export const createMsg = async (data) => {
 };
 export const getSpecificMsg = async (senderId, msgId) => {
   const msg = await messageRepo.getSpecificMsgById(msgId);
-  if (String(msg.sender) !== String(senderId))
-    throw userErrors.userNotAuthorized;
   if (!msg) throw msgErrors.messageNotFound;
   if (msg.isDeleted) throw msgErrors.messageNotFound;
+  if (String(msg.sender) !== String(senderId))
+    throw userErrors.userNotAuthorized;
+
   return msg;
+};
+
+export const updateMsg = async (senderId, msgId, data) => {
+  const msg = await messageRepo.getSpecificMsgById(msgId);
+  if (!msg) throw msgErrors.messageNotFound;
+  if (msg.isDeleted) throw msgErrors.messageNotFound;
+  if (String(msg.sender) !== String(senderId))
+    throw userErrors.userNotAuthorized;
+  const updates = Object.assign(msg, data);
+  return await messageRepo.updateMsg(msgId, updates);
 };

@@ -27,3 +27,18 @@ export async function getSpecificMsg(req, res, next) {
     return next(error);
   }
 }
+export async function updateMsg(req, res, next) {
+  try {
+    const { msgId } = req.params;
+    const senderId = req.user.id;
+    const data = validate(messageDTOS.updateMsgDto, req.body);
+    const msg = await messageService.updateMsg(senderId, msgId, data);
+    return res.status(200).json({
+      success: true,
+      message: "msg is created successfully",
+      data: msg,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}

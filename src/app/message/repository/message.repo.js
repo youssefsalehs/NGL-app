@@ -9,3 +9,9 @@ export async function getSpecificMsgById(id) {
   const msg = await Message.findOne({ _id: id });
   return msg;
 }
+export async function updateMsg(id, data) {
+  const msg = await Message.findByIdAndUpdate(id, data, {
+    returnDocument: "after",
+  });
+  return msg;
+}
