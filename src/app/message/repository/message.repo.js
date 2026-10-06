@@ -6,7 +6,7 @@ export async function createMsg(data, sender) {
 }
 
 export async function getSpecificMsgById(id) {
-  const msg = await Message.findOne({ _id: id });
+  const msg = await Message.findOne({ _id: id, isDeleted: false });
   return msg;
 }
 export async function updateMsg(id, data) {

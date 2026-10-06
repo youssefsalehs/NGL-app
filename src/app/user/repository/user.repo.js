@@ -12,6 +12,9 @@ export async function updateUserByEmail(email, updatedData) {
 
   return updatedAccount;
 }
+export async function findUserById() {
+  return User.find({ _id: id, isDeleted: false }, { password: 0 });
+}
 export async function getAllUsers() {
   return User.find({ isDeleted: false }, { password: 0 });
 }
