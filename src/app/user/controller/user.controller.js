@@ -45,3 +45,14 @@ export async function updatePassword(req, res, next) {
     return next(error);
   }
 }
+export async function getAllUsers(req, res, next) {
+  try {
+    const users = await userService.getAllUsers();
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}

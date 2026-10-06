@@ -8,6 +8,10 @@ export async function getMe(email) {
   user.password = undefined;
   return user;
 }
+export async function getAllUsers() {
+  const users = await userRepo.getAllUsers();
+  return users;
+}
 export async function updateMe(email, data) {
   const user = await authRepo.checkUserByEmail(email);
   const updates = Object.assign(user, data);

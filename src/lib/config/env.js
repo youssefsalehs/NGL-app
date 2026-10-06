@@ -12,6 +12,8 @@ const schema = z.object({
   REDIS_PORT: z.string().default("6379"),
   REDIS_HOST: z.string(),
   REDIS_PASSWORD: z.string(),
+  UPSTASH_REDIS_REST_URL: z.string(),
+  UPSTASH_REDIS_REST_TOKEN: z.string(),
 });
 
 const parsed = schema.parse(process.env);
@@ -24,6 +26,8 @@ export const env = {
     host: parsed.REDIS_HOST,
     password: parsed.REDIS_PASSWORD,
     port: Number(parsed.REDIS_PORT),
+    url: parsed.UPSTASH_REDIS_REST_URL,
+    token: parsed.UPSTASH_REDIS_REST_TOKEN,
   },
   google: {
     webClientId: parsed.GOOGLE_CLIENT_ID,

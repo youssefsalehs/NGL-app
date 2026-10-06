@@ -1,31 +1,20 @@
-import Redis from "ioredis";
-
+// import Redis from "ioredis";
+import { Redis } from "@upstash/redis";
 export class RedisCacheProvider {
   client;
   constructor(config) {
     this.client = new Redis({
-      host: config.host,
-      port: config.port,
-      password: config.password,
-      lazyConnect: true,
-      maxLoadingRetryTime: 3,
+      url: config.url,
+      token: config.token,
     });
-    this.client.on("error", (err) =>
-      console.log("redis server error", err.message),
-    );
-    this.client
-      .connect()
-      .catch((error) =>
-        console.log("failed to log to redis server", error.message),
-      );
   }
   async set(key, value, ttl) {
-    this.client.set(key, value, "EX", ttl);
+    await this.client.set(key, value,{ ex: ttl });
   }
   async get(key) {
-    this.client.get(key);
+    return await this.client.get(key);
   }
   async delete(key) {
-    this.client.del(key);
+    return await this.client.del(key);
   }
 }

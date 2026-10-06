@@ -9,5 +9,9 @@ export async function updateUserByEmail(email, updatedData) {
       returnDocument: "after",
     },
   );
+
   return updatedAccount;
+}
+export async function getAllUsers() {
+  return User.find({ isDeleted: false }, { password: 0 });
 }

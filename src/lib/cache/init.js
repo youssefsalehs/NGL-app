@@ -1,7 +1,10 @@
-import { RedisCacheProvider } from "../../pkg/cache/redis";
+import { RedisCacheProvider } from "../../pkg/cache/redis.js";
+import { env } from "../config/env.js";
 
 export const cacheProvider = new RedisCacheProvider({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  password: process.env.REDIS_PASSWORD || "",
+  // host: env.redis.host,
+  // port: env.redis.port,
+  //   password: env.redis.password || "",
+  url: env.redis.url,
+  token: env.redis.token,
 });
