@@ -14,6 +14,10 @@ const schema = z.object({
   REDIS_PASSWORD: z.string(),
   UPSTASH_REDIS_REST_URL: z.string(),
   UPSTASH_REDIS_REST_TOKEN: z.string(),
+  MAILJET_API_KEY: z.string(),
+  MAILJET_SECRET_KEY: z.string(),
+  MAILJET_FROM_EMAIL: z.string().trim().toLowerCase(),
+  MAILJET_FROM_NAME: z.string(),
 });
 
 const parsed = schema.parse(process.env);
@@ -36,6 +40,12 @@ export const env = {
     host: parsed.EMAIL_HOST,
     user: parsed.EMAIL_USER,
     password: parsed.EMAIL_PASS,
+  },
+  mailJet: {
+    apiKey: parsed.MAILJET_API_KEY,
+    secretKey: parsed.MAILJET_SECRET_KEY,
+    fromEmail: parsed.MAILJET_FROM_EMAIL,
+    fromName: parsed.MAILJET_FROM_NAME,
   },
   jwt: {
     secret: parsed.JWT_SECRET,

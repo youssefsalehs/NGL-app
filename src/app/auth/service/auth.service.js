@@ -10,6 +10,7 @@ import * as otpRepo from "../repository/otp.repo.js";
 import { hashPassword, matchPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/token.js";
 import { verifyGoogleToken } from "../../../lib/utils/google-auth.js";
+import { mailjetProvider } from "../../../lib/email/init.js";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
@@ -25,7 +26,12 @@ export async function register(userData) {
   });
   newUser.password = undefined;
   const htmlContent = getOtpEmailTemplate(code, "register");
-  await sendEmail(newUser.email, "Verify Your Email - NGL", htmlContent);
+  // await sendEmail(newUser.email, "Verify Your Email - NGL", htmlContent);
+  await mailjetProvider.sendEmail(
+    newUser.email,
+    "Verify Your Email - NGL",
+    htmlContent,
+  );
   return newUser;
 }
 export async function verifyAccount(email, code) {
@@ -78,7 +84,8 @@ export async function sendOtp(email) {
     expiresAt: Date.now() + toMs(15, "minutes"),
   });
   const htmlContent = getOtpEmailTemplate(code, "resend");
-  await sendEmail(user.email, "New OTP - NGL", htmlContent);
+  // await sendEmail(user.email, "New OTP - NGL", htmlContent);
+  await mailjetProvider.sendEmail(user.email, "New OTP - NGL", htmlContent);
 }
 export async function resetPassword(email, code, newPassword) {
   const otp = await otpRepo.findOtpByEmail(email);
