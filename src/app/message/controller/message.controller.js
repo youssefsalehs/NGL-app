@@ -1,4 +1,4 @@
-import { validate } from "../../../common/validation/validation.js";
+import { validate } from "../../../lib/validation/validation.js";
 import * as messageDTOS from "../dto/message.dto.js";
 import * as messageService from "../service/message.service.js";
 export async function createMsg(req, res, next) {

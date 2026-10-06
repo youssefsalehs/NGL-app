@@ -1,7 +1,7 @@
-import { getOtpEmailTemplate } from "../../../common/email/emailTemplates.js";
-import { sendEmail } from "../../../common/email/nodemailer.js";
-import { generateOtp } from "../../../common/utils/generateOtp.js";
-import { toMs } from "../../../common/utils/time.js";
+import { getOtpEmailTemplate } from "../../../lib/email/emailTemplates.js";
+import { sendEmail } from "../../../lib/email/nodemailer.js";
+import { generateOtp } from "../../../lib/utils/generateOtp.js";
+import { toMs } from "../../../pkg/utils/time.js";
 import * as userErrors from "../../user/errors.js";
 import * as userRepo from "../../user/repository/user.repo.js";
 import * as authErrors from "../errors.js";
@@ -9,7 +9,7 @@ import * as authRepo from "../repository/auth.repo.js";
 import * as otpRepo from "../repository/otp.repo.js";
 import { hashPassword, matchPassword } from "../utils/hash.js";
 import { generateToken } from "../utils/token.js";
-import { verifyGoogleToken } from "../../../common/utils/google-auth.js";
+import { verifyGoogleToken } from "../../../lib/utils/google-auth.js";
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {

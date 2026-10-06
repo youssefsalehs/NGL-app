@@ -1,19 +1,20 @@
 import { createTransport } from "nodemailer";
+import { env } from "../config/env.js";
 
 const transporter = createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  host: env.nodemailer.host || "smtp.gmail.com",
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: env.nodemailer.user,
+    pass: env.nodemailer.password,
   },
 });
 
 export async function sendEmail(to, subject, html) {
   try {
     const info = await transporter.sendMail({
-      from: `"NGL App" <${process.env.EMAIL_USER}>`,
+      from: `"NGL App" <${env.nodemailer.user}>`,
       to,
       subject,
       html,

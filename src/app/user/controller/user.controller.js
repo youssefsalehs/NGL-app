@@ -1,4 +1,4 @@
-import { validate } from "../../../common/validation/validation.js";
+import { validate } from "../../../lib/validation/validation.js";
 import * as userService from "../service/user.service.js";
 import { updatePasswordDto, updateUserDto } from "../dto/user.dto.js";
 export async function getMe(req, res, next) {

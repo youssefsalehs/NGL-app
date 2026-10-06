@@ -1,8 +1,9 @@
 import { OAuth2Client } from "google-auth-library";
-import { AppError } from "../error/error.js";
+import { AppError } from "../../pkg/error/error.js";
+import { env } from "../config/env.js";
 
 const client = new OAuth2Client({
-  client_id: process.env.GOOGLE_CLIENT_ID,
+  client_id: env.google.webClientId,
 });
 export async function verifyGoogleToken(idToken) {
   try {

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { AppError } from "../../common/error/error.js";
+import { AppError } from "../../pkg/error/error.js";
 import User from "../../app/user/model/user.model.js";
 import * as userErrors from "../../app/user/errors.js";
 export const guard = async (req, res, next) => {

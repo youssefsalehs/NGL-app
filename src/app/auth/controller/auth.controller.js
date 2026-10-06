@@ -1,5 +1,5 @@
-import { toMs } from "../../../common/utils/time.js";
-import { validate } from "../../../common/validation/validation.js";
+import { toMs } from "../../../pkg/utils/time.js";
+import { validate } from "../../../lib/validation/validation.js";
 import {
   loginDto,
   registerDto,
