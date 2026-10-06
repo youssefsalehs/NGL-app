@@ -9,12 +9,14 @@ export const createMsg = async (data, sender) => {
   }
   return await messageRepo.createMsg(data, sender);
 };
-export const getSpecificMsg = async (senderId, msgId) => {
+export const getSpecificMsg = async (userId, msgId) => {
   const msg = await messageRepo.getSpecificMsgById(msgId);
   if (!msg) throw msgErrors.messageNotFound;
-  if (String(msg.sender) !== String(senderId))
+  const isSender = String(msg.sender) === userId;
+  const isReceiver = String(msg.receiver) === userId;
+  if (!isSender && !isReceiver) {
     throw userErrors.userNotAuthorized;
-
+  }
   return msg;
 };
 

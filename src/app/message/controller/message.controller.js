@@ -19,8 +19,8 @@ export async function createMsg(req, res, next) {
 export async function getSpecificMsg(req, res, next) {
   try {
     const { msgId } = req.params;
-    const senderId = req.user.id;
-    const msg = await messageService.getSpecificMsg(senderId, msgId);
+    const userId = req.user.id;
+    const msg = await messageService.getSpecificMsg(userId, msgId);
     return res.status(200).json({
       success: true,
       data: msg,
