@@ -15,3 +15,23 @@ export async function updateMsg(id, data) {
   });
   return msg;
 }
+export async function getAllMsgsForUser(userId, query) {
+  const page = +query.page || 1;
+  const limit = +query.limit || 10;
+  const skip = (page - 1) * limit;
+  const msgs = await Message.find({ receiver: userId }, {}, { limit, skip });
+  const totalMsgs = await Message.countDocuments({
+    receiver: userId,
+    isDeleted: false,
+  });
+  console.log(msgs, totalMsgs);
+  return {
+    data: msgs,
+    metaData: {
+      currentPage: page,
+      total: totalMsgs,
+      totalPages: Math.ceil(totalMsgs / limit),
+      limit,
+    },
+  };
+}

@@ -26,3 +26,8 @@ export const updateMsg = async (senderId, msgId, data) => {
   const updates = Object.assign(msg, data);
   return await messageRepo.updateMsg(msgId, updates);
 };
+
+export const getAllMsgsForUser = async (userId, query) => {
+  const { data, metaData } = await messageRepo.getAllMsgsForUser(userId, query);
+  return { data, metaData };
+};

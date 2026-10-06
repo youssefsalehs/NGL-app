@@ -44,3 +44,19 @@ export async function updateMsg(req, res, next) {
     return next(error);
   }
 }
+export async function getAllMsgsForUser(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const { data, metaData } = await messageService.getAllMsgsForUser(
+      userId,
+      req.query,
+    );
+    return res.status(200).json({
+      success: true,
+      data,
+      metaData,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
