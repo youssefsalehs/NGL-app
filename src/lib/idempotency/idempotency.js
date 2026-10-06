@@ -1,9 +1,13 @@
-import { cacheProvider } from "./init.js";
+import { AppError } from "../../pkg/error/error.js";
+import { cacheProvider } from "../cache/init.js";
 
-export function withCache(ttl = 3600) {
+export function idempotency(ttl = 3600) {
   return async (req, res, next) => {
-    const key = `${req.method}:${req.originalUrl}`;
-
+    const idempotency = req.headers["idempotency-key"];
+    if (!idempotency) {
+      return next(new AppError("Idempotency key is required", 400));
+    }
+    let key = `${req.method}:${req.originalUrl}:${idempotency}`;
     try {
       const cached = await cacheProvider.get(key);
       if (cached) {

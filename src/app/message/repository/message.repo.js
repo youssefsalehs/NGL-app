@@ -1,7 +1,7 @@
 import Message from "../model/message.model.js";
 
-export async function createMsg(data) {
-  const msg = await Message.create(data);
+export async function createMsg(data, sender) {
+  const msg = await Message.create({ ...data, sender });
   return msg;
 }
 

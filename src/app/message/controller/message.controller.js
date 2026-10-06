@@ -4,7 +4,9 @@ import * as messageService from "../service/message.service.js";
 export async function createMsg(req, res, next) {
   try {
     const data = validate(messageDTOS.createMsgDto, req.body);
-    const msg = await messageService.createMsg(data);
+    const sender = req.user?.id;
+    const msg = await messageService.createMsg(data, sender);
+
     return res.status(201).json({
       success: true,
       message: "msg is created successfully",

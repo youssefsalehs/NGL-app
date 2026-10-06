@@ -14,7 +14,7 @@ export const guard = async (req, res, next) => {
     if (!user) {
       return next(userErrors.userNotFound);
     }
-    req.user = { id: user._id, email: user.email };
+    req.user = decoded;
     next();
   } catch (error) {
     return next(new AppError("Invalid or expired token.", 403));
