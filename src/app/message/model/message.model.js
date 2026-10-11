@@ -8,10 +8,10 @@ const messageSchema = new Schema(
       maxlength: 20,
       trim: true,
     },
-
     receiver: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     sender: { type: Schema.Types.ObjectId, ref: "User" },
     isDeleted: { type: Boolean, default: false },
+    media: [String],
   },
   {
     timestamps: true,

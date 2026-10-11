@@ -3,6 +3,7 @@ import * as userRepo from "../repository/user.repo.js";
 import { userNotFound } from "../errors.js";
 import { passwordNotMatch, samePassword } from "../../auth/errors.js";
 import { hashPassword, matchPassword } from "../../auth/utils/hash.js";
+import fs from "fs";
 export async function getMe(email) {
   const user = await authRepo.checkUserByEmail(email);
   user.password = undefined;
@@ -36,4 +37,27 @@ export async function updatePassword(email, data) {
   }
   const hashedPassword = await hashPassword(data.newPassword);
   await userRepo.updateUserByEmail(email, { password: hashedPassword });
+}
+export async function uploadProfilePicture(userId, filePath) {
+  const user = await userRepo.findUserById(userId);
+  if (!user) {
+    throw userNotFound;
+  }
+  if (user.profilePicture) {
+    fs.unlinkSync(user.profilePicture);
+  }
+
+  await userRepo.updateUserByEmail(user.email, {
+    profilePicture: filePath,
+  });
+}
+export async function uploadCoverPicture(userId, filePath) {
+  const user = await userRepo.findUserById(userId);
+  if (!user) {
+    throw userNotFound;
+  }
+  if (user.coverPicture) {
+    fs.unlinkSync(user.coverPicture);
+  }
+  await userRepo.updateUserByEmail(user.email, { coverPicture: filePath });
 }

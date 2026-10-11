@@ -56,3 +56,30 @@ export async function getAllUsers(req, res, next) {
     return next(error);
   }
 }
+export async function uploadProfilePicture(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const filePath = req.file.path;
+
+    await userService.uploadProfilePicture(userId, filePath);
+    return res.status(200).json({
+      success: true,
+      message: "profile picture uploaded successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function uploadCoverPicture(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const filePath = req.file.path;
+    await userService.uploadCoverPicture(userId, filePath);
+    return res.status(200).json({
+      success: true,
+      message: "cover picture uploaded successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}

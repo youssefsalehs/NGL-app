@@ -2,12 +2,12 @@ import * as userRepo from "../../user/repository/user.repo.js";
 import * as messageRepo from "../repository/message.repo.js";
 import * as userErrors from "../../user/errors.js";
 import * as msgErrors from "../errors.js";
-export const createMsg = async (data, sender) => {
+export const createMsg = async (data, sender, mediaFiles = []) => {
   const receiverUser = await userRepo.findUserById(data.receiver);
   if (!receiverUser) {
     throw userErrors.userNotFound;
   }
-  return await messageRepo.createMsg(data, sender);
+  return await messageRepo.createMsg(data, sender, mediaFiles);
 };
 export const getSpecificMsg = async (userId, msgId) => {
   const msg = await messageRepo.getSpecificMsgById(msgId);

@@ -31,6 +31,8 @@ const userSchema = new Schema(
     isVerified: { type: Boolean, default: false },
     dob: Date,
     gender: { type: String, enum: ["male", "female"] },
+    profilePicture: String,
+    coverPicture: String,
   },
   {
     timestamps: true,

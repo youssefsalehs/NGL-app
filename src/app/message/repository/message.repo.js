@@ -1,7 +1,7 @@
 import Message from "../model/message.model.js";
 
-export async function createMsg(data, sender) {
-  const msg = await Message.create({ ...data, sender });
+export async function createMsg(data, sender,mediaFiles=[]) {
+  const msg = await Message.create({ ...data, sender, media:mediaFiles });
   return msg;
 }
 
@@ -24,7 +24,7 @@ export async function getAllMsgsForUser(userId, query) {
     receiver: userId,
     isDeleted: false,
   });
-  console.log(msgs, totalMsgs);
+
   return {
     data: msgs,
     metaData: {

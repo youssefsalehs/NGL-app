@@ -5,7 +5,8 @@ export async function createMsg(req, res, next) {
   try {
     const data = validate(messageDTOS.createMsgDto, req.body);
     const sender = req.user?.id;
-    const msg = await messageService.createMsg(data, sender);
+    const mediaFiles = req.files ? req.files.map((file) => file.path) : [];
+    const msg = await messageService.createMsg(data, sender, mediaFiles);
 
     return res.status(201).json({
       success: true,
