@@ -41,10 +41,18 @@ export async function login(req, res, next) {
   try {
     const data = validate(loginDto, req.body);
     const { email, password } = data;
-    const token = await authService.login(email, password);
-    res.cookie("access_token", token, {
+    const { accessToken, refreshToken } = await authService.login(
+      email,
+      password,
+    );
+    res.cookie("access_token", accessToken, {
       httpOnly: true,
       maxAge: toMs(1, "hours"),
+    });
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      path: "/api/v1/auth/refresh",
+      maxAge: toMs(7, "days"),
     });
 
     return res.status(200).json({
@@ -64,7 +72,9 @@ export async function sendOtp(req, res, next) {
       success: true,
       message: "a new email is sent with a new otp",
     });
-  } catch (error) {}
+  } catch (error) {
+    return next(error);
+  }
 }
 
 export async function resetPassword(req, res, next) {
@@ -85,17 +95,44 @@ export async function resetPassword(req, res, next) {
 export async function googleLogin(req, res, next) {
   try {
     const { idToken } = req.body;
-    const token = await authService.loginWithGoogle(idToken);
+    const { accessToken, refreshToken } =
+      await authService.loginWithGoogle(idToken);
 
-    res.cookie("access_token", token, {
+    res.cookie("access_token", accessToken, {
       httpOnly: true,
       maxAge: toMs(1, "hours"),
+    });
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      path: "/api/v1/auth/refresh",
+      maxAge: toMs(7, "days"),
     });
 
     return res.status(200).json({
       success: true,
       message: "user log in success",
     });
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function refresh(req, res, next) {
+  try {
+    const token = req.cookies.refresh_token;
+    const { accessToken, refreshToken } = await authService.refresh(token);
+
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      maxAge: toMs(1, "hours"),
+    });
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      path: "/api/v1/auth/refresh",
+      maxAge: toMs(7, "days"),
+    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Token refreshed successfully" });
   } catch (error) {
     return next(error);
   }
