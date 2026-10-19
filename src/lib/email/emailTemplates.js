@@ -2,6 +2,8 @@ export function getOtpEmailTemplate(code, type = "register") {
   const titles = {
     register: "Welcome to NGL! Verify Your Email",
     resend: "Your New NGL Verification Code",
+    enable2FA: "Enable Two-Step Verification",
+    login2FA: "Two-Step Verification Login Code",
   };
 
   const descriptions = {
@@ -9,8 +11,11 @@ export function getOtpEmailTemplate(code, type = "register") {
       "Thanks for joining NGL! Please use the verification code below to complete your registration.",
     resend:
       "You requested a new verification code. Use the code below to verify your account.",
+    enable2FA:
+      "You requested to enable two-step verification for your NGL account. Use the code below to confirm this change.",
+    login2FA:
+      "Someone is trying to log into your NGL account. Use the verification code below to complete your sign-in.",
   };
-
   return `
     <!DOCTYPE html>
     html lang="en">

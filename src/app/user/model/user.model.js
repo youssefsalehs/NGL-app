@@ -32,6 +32,7 @@ const userSchema = new Schema(
     dob: Date,
     gender: { type: String, enum: ["male", "female"] },
     profilePicture: String,
+    twoStepVerification: { type: Boolean, default: false },
     coverPicture: String,
   },
   {

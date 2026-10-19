@@ -1,19 +1,19 @@
+import { cacheProvider } from "../../../lib/cache/init.js";
 import { getOtpEmailTemplate } from "../../../lib/email/emailTemplates.js";
-import { sendEmail } from "../../../lib/email/nodemailer.js";
+import { mailjetProvider } from "../../../lib/email/init.js";
 import { generateOtp } from "../../../lib/utils/generateOtp.js";
-import { toMs, toSeconds } from "../../../pkg/utils/time.js";
+import { verifyGoogleToken } from "../../../lib/utils/google-auth.js";
+import { AppError } from "../../../pkg/error/error.js";
+import { toSeconds } from "../../../pkg/utils/time.js";
 import * as userErrors from "../../user/errors.js";
 import * as userRepo from "../../user/repository/user.repo.js";
 import * as authErrors from "../errors.js";
 import * as authRepo from "../repository/auth.repo.js";
-import * as otpRepo from "../repository/otp.repo.js";
 import { hashPassword, matchPassword } from "../utils/hash.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
-import { verifyGoogleToken } from "../../../lib/utils/google-auth.js";
-import { mailjetProvider } from "../../../lib/email/init.js";
-import { cacheProvider } from "../../../lib/cache/init.js";
-import { env } from "../../../lib/config/env.js";
 import verifyRefreshToken from "../utils/verifyRefreshToken.js";
+const enable2FAKey = `enable2FactorAuth`;
+const login2FAKey = `loginCode`;
 export async function register(userData) {
   const user = await authRepo.checkUserByEmail(userData.email);
   if (user) {
@@ -86,6 +86,21 @@ export async function login(email, password) {
   if (!isMatch) {
     throw authErrors.passwordNotMatch;
   }
+  if (user.twoStepVerification) {
+    const code = generateOtp();
+    await cacheProvider.set(
+      `${login2FAKey}:${email}`,
+      code,
+      toSeconds(3, "minutes"),
+    );
+    const htmlContent = getOtpEmailTemplate(code, "login2FA");
+    mailjetProvider.sendEmail(
+      email,
+      "Login with two step verification",
+      htmlContent,
+    );
+    return;
+  }
   const accessToken = generateAccessToken({
     id: user._id,
     email: user.email,
@@ -99,6 +114,32 @@ export async function login(email, password) {
     refreshToken,
     toSeconds(7, "days"),
   );
+
+  return { accessToken, refreshToken };
+}
+export async function verifyLoginCode(email, code) {
+  const user = await authRepo.checkUserByEmail(email);
+  if (!user) {
+    throw userErrors.userNotFound;
+  }
+
+  const cachedCode = await cacheProvider.get(`${login2FAKey}:${email}`);
+  if (!cachedCode) {
+    throw authErrors.otpExpired;
+  }
+  if (code != cachedCode) {
+    throw authErrors.wrongOtp;
+  }
+  const accessToken = generateAccessToken({
+    id: user._id,
+    email: user.email,
+    name: user.name,
+  });
+  const refreshToken = generateRefreshToken({
+    id: user._id,
+  });
+
+  await cacheProvider.del(`${login2FAKey}:${email}`);
 
   return { accessToken, refreshToken };
 }
@@ -204,4 +245,38 @@ export async function refresh(token) {
   );
 
   return { accessToken, refreshToken };
+}
+
+export async function enable2StepVerification(email) {
+  const user = await authRepo.checkUserByEmail(email);
+  if (!user) return;
+  if (user.twoStepVerification) {
+    throw new AppError("two step verification already enabled");
+  }
+  const code = generateOtp();
+  await cacheProvider.set(
+    `${enable2FAKey}:${email}`,
+    code,
+    toSeconds(3, "minutes"),
+  );
+  const htmlContent = getOtpEmailTemplate(code, "enable2FA");
+  mailjetProvider.sendEmail(email, "Enable two step verification", htmlContent);
+}
+export async function verifyEnable2StepVerification(email, code) {
+  const user = await authRepo.checkUserByEmail(email);
+  //for safety
+  if (!user) {
+    throw authErrors.wrongOtp;
+  }
+
+  const cachedCode = await cacheProvider.get(`${enable2FAKey}:${email}`);
+  if (!cachedCode) {
+    throw authErrors.otpExpired;
+  }
+  if (cachedCode != code) {
+    throw authErrors.wrongOtp;
+  }
+
+  await userRepo.updateUserByEmail(email, { twoStepVerification: true });
+  await cacheProvider.del(`${enable2FAKey}:${email}`);
 }
