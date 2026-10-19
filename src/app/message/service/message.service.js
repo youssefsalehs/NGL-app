@@ -4,19 +4,26 @@ import * as userErrors from "../../user/errors.js";
 import * as msgErrors from "../errors.js";
 export const createMsg = async (data, sender, mediaFiles = []) => {
   const receiverUser = await userRepo.findUserById(data.receiver);
-  if (!receiverUser) {
+  if (!receiverUser || !receiverUser.isVerified) {
     throw userErrors.userNotFound;
   }
-  return await messageRepo.createMsg(data, sender, mediaFiles);
+
+  const newMsg = await messageRepo.createMsg(data, sender, mediaFiles);
+  newMsg.sender = data.isAnonymous ? null : newMsg.sender;
+  return newMsg;
 };
 export const getSpecificMsg = async (userId, msgId) => {
   const msg = await messageRepo.getSpecificMsgById(msgId);
   if (!msg) throw msgErrors.messageNotFound;
-  const isSender = String(msg.sender) === userId;
-  const isReceiver = String(msg.receiver) === userId;
+  const isSender = String(msg.sender) === String(userId);
+  const isReceiver = String(msg.receiver) === String(userId);
   if (!isSender && !isReceiver) {
     throw userErrors.userNotAuthorized;
   }
+  if (msg.isAnonymous && isReceiver) {
+    msg.sender = undefined;
+  }
+  msg.isAnonymous = undefined;
   return msg;
 };
 
@@ -31,5 +38,12 @@ export const updateMsg = async (senderId, msgId, data) => {
 
 export const getAllMsgsForUser = async (userId, query) => {
   const { data, metaData } = await messageRepo.getAllMsgsForUser(userId, query);
-  return { data, metaData };
+  const anonymizedData = data.map((msg) => {
+    if (msg.isAnonymous && String(msg.receiver) === String(userId)) {
+      msg.sender = undefined;
+    }
+    msg.isAnonymous = undefined;
+    return msg;
+  });
+  return { data: anonymizedData, metaData };
 };
