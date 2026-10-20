@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { toMs } from "../../pkg/utils/time.js";
 import { AppError } from "../../pkg/error/error.js";
 
@@ -8,8 +8,9 @@ export default function loginFailLimiter() {
     limit: 5,
     standardHeaders: "draft-8",
     skipSuccessfulRequests: true,
-    keyGenerator: (req) => {
-      let ip = req.ip || "unknown";
+    keyGenerator: (req, res) => {
+      let ip = ipKeyGenerator(req.ip);
+
       if (ip === "::1" || ip === "::ffff:127.0.0.1") {
         ip = "127.0.0.1";
       }

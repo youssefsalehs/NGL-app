@@ -2,7 +2,8 @@ import { AppError } from "../../../pkg/error/error.js";
 import * as msgErrors from "../../message/errors.js";
 import * as messageRepo from "../../message/repository/message.repo.js";
 import * as requestRepo from "../repository/request.repository.js";
-
+import * as conversationService from "../../conversation/service/conversation.service.js";
+import * as conversationRepo from "../../conversation/repository/conversation.repository.js";
 export const requestNotKnown = new AppError(
   "message sender is not known.",
   404,
@@ -51,7 +52,16 @@ export async function updateRequestStatus(requestId, status) {
   const updated = await requestRepo.updateRequestStatus(requestId, {
     status,
   });
-
+  if (updated.status == "accepted") {
+    const conversation = await conversationService.createConversation(
+      request.sender,
+      request.receiver,
+    );
+    await conversationRepo.addNewMessageToConversation(
+      conversation._id,
+      request.messageId,
+    );
+  }
   return updated;
 }
 
