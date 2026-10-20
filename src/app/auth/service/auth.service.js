@@ -204,7 +204,7 @@ export async function loginWithGoogle(idToken) {
   if (user) {
     return { accessToken, refreshToken };
   }
-  const newUser = await authRepo.createUser({
+  await authRepo.createUser({
     name: payload.name,
     email: payload.email,
     provider: "google",
