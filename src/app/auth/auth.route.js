@@ -3,7 +3,9 @@ import * as authController from "./controller/auth.controller.js";
 import { idempotency } from "../../lib/idempotency/idempotency.js";
 import { toSeconds } from "../../pkg/utils/time.js";
 import { guard } from "../../lib/auth/guard.js";
+import loginFailLimiter from "../../lib/limiter/loginFailLimiter.js";
 const authRouter = Router();
+const loginLimiter = loginFailLimiter();
 authRouter.post(
   "/register",
   idempotency(toSeconds(15, "minutes")),
@@ -15,7 +17,7 @@ authRouter.patch(
   authController.verifyAccount,
 );
 // endpoints belong to ordinar login or two step verification login
-authRouter.post("/login", authController.login);
+authRouter.post("/login", loginLimiter, authController.login);
 authRouter.post(
   "/verify-login",
   idempotency(toSeconds(3, "minutes")),
