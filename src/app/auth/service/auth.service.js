@@ -35,11 +35,11 @@ export async function register(userData) {
   newUser.password = undefined;
   const htmlContent = getOtpEmailTemplate(code, "register");
   // await sendEmail(newUser.email, "Verify Your Email - NGL", htmlContent);
-  await mailjetProvider.sendEmail(
-    newUser.email,
-    "Verify Your Email - NGL",
-    htmlContent,
-  );
+  // await mailjetProvider.sendEmail(
+  //   newUser.email,
+  //   "Verify Your Email - NGL",
+  //   htmlContent,
+  // );
   return newUser;
 }
 export async function verifyAccount(email, code) {
@@ -93,12 +93,12 @@ export async function login(email, password) {
       code,
       toSeconds(3, "minutes"),
     );
-    const htmlContent = getOtpEmailTemplate(code, "login2FA");
-    mailjetProvider.sendEmail(
-      email,
-      "Login with two step verification",
-      htmlContent,
-    );
+    // const htmlContent = getOtpEmailTemplate(code, "login2FA");
+    // mailjetProvider.sendEmail(
+    //   email,
+    //   "Login with two step verification",
+    //   htmlContent,
+    // );
     return;
   }
   const accessToken = generateAccessToken({
@@ -145,6 +145,8 @@ export async function verifyLoginCode(email, code) {
 }
 export async function sendOtp(email) {
   const user = await authRepo.checkUserByEmail(email);
+  console.log(email);
+
   if (!user) {
     throw userErrors.userNotFound;
   }
@@ -160,9 +162,9 @@ export async function sendOtp(email) {
   //   email: user.email,
   //   expiresAt: Date.now() + toMs(15, "minutes"),
   // });
-  const htmlContent = getOtpEmailTemplate(code, "resend");
-  // await sendEmail(user.email, "New OTP - NGL", htmlContent);
-  await mailjetProvider.sendEmail(user.email, "New OTP - NGL", htmlContent);
+  // const htmlContent = getOtpEmailTemplate(code, "resend");
+  // // await sendEmail(user.email, "New OTP - NGL", htmlContent);
+  // await mailjetProvider.sendEmail(user.email, "New OTP - NGL", htmlContent);
 }
 export async function resetPassword(email, code, newPassword) {
   const user = await authRepo.checkUserByEmail(email);
@@ -214,7 +216,7 @@ export async function loginWithGoogle(idToken) {
 }
 export async function refresh(token) {
   if (!token) {
-    throw authErrors.noRefreshToken;
+    throw authErrors.refreshExpired;
   }
 
   const payload = verifyRefreshToken(token);
@@ -227,7 +229,7 @@ export async function refresh(token) {
     `refreshToken:${payload.id.toString()}`,
   );
   if (!storedToken) {
-    throw authErrors.tokenRevoked;
+    throw authErrors.refreshExpired;
   }
 
   const accessToken = generateAccessToken({
@@ -279,4 +281,26 @@ export async function verifyEnable2StepVerification(email, code) {
 
   await userRepo.updateUserByEmail(email, { twoStepVerification: true });
   await cacheProvider.del(`${enable2FAKey}:${email}`);
+}
+
+export async function logout(refreshToken) {
+  if (!refreshToken) {
+    throw authErrors.refreshExpired;
+  }
+  const payload = verifyRefreshToken(refreshToken);
+  const user = await userRepo.findUserById(payload.id);
+  if (!user || !user.isVerified) {
+    throw userErrors.userNotFound;
+  }
+
+  const storedToken = await cacheProvider.get(
+    `refreshToken:${user._id.toString()}`,
+  );
+  if (!storedToken) {
+    throw authErrors.tokenRevoked;
+  }
+
+
+  await cacheProvider.del(
+    `refreshToken:${user._id.toString()}`);
 }

@@ -6,9 +6,13 @@ import { guard } from "../../lib/auth/guard.js";
 import loginFailLimiter from "../../lib/limiter/loginFailLimiter.js";
 const authRouter = Router();
 const loginLimiter = loginFailLimiter();
+authRouter.get(
+  "/me",
+  guard,
+  authController.getMe,
+);
 authRouter.post(
   "/register",
-  idempotency(toSeconds(15, "minutes")),
   authController.register,
 );
 authRouter.patch(
@@ -18,13 +22,14 @@ authRouter.patch(
 );
 // endpoints belong to ordinar login or two step verification login
 authRouter.post("/login", loginLimiter, authController.login);
+authRouter.post("/logout", authController.logout);
 authRouter.post(
   "/verify-login",
   idempotency(toSeconds(3, "minutes")),
   authController.verifyLoginCode,
 );
 
-authRouter.post("/refresh", guard, authController.refresh);
+authRouter.post("/refresh", authController.refresh);
 authRouter.post(
   "/send-otp",
   idempotency(toSeconds(15, "minutes")),

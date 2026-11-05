@@ -6,7 +6,6 @@ import { env } from "../config/env.js";
 export const guard = async (req, res, next) => {
   try {
     const token = req.cookies.access_token;
-    // console.log(token);
     if (!token) {
       return next(new AppError("Authentication token missing.", 401));
     }
@@ -15,9 +14,9 @@ export const guard = async (req, res, next) => {
     if (!user) {
       return next(userErrors.userNotFound);
     }
-    req.user = decoded;
+    req.user = user;
     next();
   } catch (error) {
-    return next(new AppError("Invalid or expired token.", 403));
+    return next(new AppError("Invalid or expired token.", 401));
   }
 };

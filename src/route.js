@@ -11,7 +11,5 @@ router.use("/message", messageRouter);
 router.use("/user", userRouter);
 router.use("/request", requestRouter);
 router.use("/conversation", conversationRouter);
-router.use((req, res, next) => {
-  next(new AppError("route not found", 404));
-});
+
 export default router;

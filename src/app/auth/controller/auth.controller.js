@@ -11,6 +11,17 @@ import {
 } from "../dto/auth.dto.js";
 import * as authService from "../service/auth.service.js";
 import generateTokens from "../utils/generateTokens.js";
+export async function getMe(req, res, next){
+  try {
+    const user = req.user;
+    return res.status(200).json({
+      success: true,
+      data:user
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
 export async function register(req, res, next) {
   try {
     const data = validate(registerDto, req.body);
@@ -19,7 +30,7 @@ export async function register(req, res, next) {
     return res.status(201).json({
       success: true,
       message: "user created successfully",
-      user: newUser,
+      data: newUser,
     });
   } catch (error) {
     return next(error);
@@ -33,8 +44,7 @@ export async function verifyAccount(req, res, next) {
 
     return res.status(200).json({
       success: true,
-      message: "user verified successfully",
-      data: updatedUser,
+      message: "user verified successfully"
     });
   } catch (error) {
     return next(error);
@@ -57,6 +67,22 @@ export async function login(req, res, next) {
     return res.status(200).json({
       success: true,
       message: "user logged in successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function logout(req, res, next) {
+  try {
+    const refreshToken = req.cookies?.refresh_token;
+    await authService.logout(refreshToken);
+
+    res.clearCookie("access_token", {  path:'/'});
+    res.clearCookie("refresh_token",{ path:'/api/v1/auth'});
+
+    return res.status(200).json({
+      success: true,
+      message: "user logged out successfully",
     });
   } catch (error) {
     return next(error);

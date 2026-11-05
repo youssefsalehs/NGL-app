@@ -7,7 +7,7 @@ export default function generateTokens(res, accessToken, refreshToken) {
   });
   res.cookie("refresh_token", refreshToken, {
     httpOnly: true,
-    path: "/api/v1/auth/refresh",
+    path: "/api/v1/auth/",
     maxAge: toMs(7, "days"),
   });
 }
