@@ -22,8 +22,12 @@ export function createApp() {
     }),
   );
   // app.use("/uploads", express.static("uploads"));
+
   app.use(express.json());
   app.use(correlationId);
+  app.get("/", (req, res) => {
+    return res.send("welcome to LMK api");
+  });
   app.use("/api/v1/", router);
   router.use((req, res, next) => {
     next(new AppError("route not found", 404));
