@@ -39,10 +39,9 @@ export const updateMsg = async (senderId, msgId, data) => {
 export const getAllMsgsForUser = async (userId, query) => {
   const { data, metaData } = await messageRepo.getAllMsgsForUser(userId, query);
   const anonymizedData = data.map((msg) => {
-    if (msg.isAnonymous && String(msg.receiver) === String(userId)) {
+    if (msg.isAnonymous) {
       msg.sender = undefined;
     }
-    msg.isAnonymous = undefined;
     return msg;
   });
   return { data: anonymizedData, metaData };

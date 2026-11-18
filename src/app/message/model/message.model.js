@@ -11,7 +11,8 @@ const messageSchema = new Schema(
     receiver: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     sender: { type: Schema.Types.ObjectId, ref: "User" },
     isDeleted: { type: Boolean, default: false },
-    isAnonymous: { type: Boolean, default: false },
+    isAnonymous: { type: Boolean, default: true },
+    hasRequestedReveal: { type: Boolean, default: false },
     media: [String],
   },
   {

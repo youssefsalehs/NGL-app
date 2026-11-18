@@ -34,12 +34,12 @@ export async function register(userData) {
   );
   newUser.password = undefined;
   const htmlContent = getOtpEmailTemplate(code, "register");
-  // await sendEmail(newUser.email, "Verify Your Email - NGL", htmlContent);
-  // await mailjetProvider.sendEmail(
-  //   newUser.email,
-  //   "Verify Your Email - NGL",
-  //   htmlContent,
-  // );
+  await sendEmail(newUser.email, "Verify Your Email - NGL", htmlContent);
+  await mailjetProvider.sendEmail(
+    newUser.email,
+    "Verify Your Email - NGL",
+    htmlContent,
+  );
   return newUser;
 }
 export async function verifyAccount(email, code) {
@@ -86,6 +86,7 @@ export async function login(email, password) {
   if (!isMatch) {
     throw authErrors.passwordNotMatch;
   }
+
   if (user.twoStepVerification) {
     const code = generateOtp();
     await cacheProvider.set(
@@ -93,13 +94,16 @@ export async function login(email, password) {
       code,
       toSeconds(3, "minutes"),
     );
-    // const htmlContent = getOtpEmailTemplate(code, "login2FA");
-    // mailjetProvider.sendEmail(
-    //   email,
-    //   "Login with two step verification",
-    //   htmlContent,
-    // );
-    return;
+    const htmlContent = getOtpEmailTemplate(code, "login2FA");
+    mailjetProvider.sendEmail(
+      email,
+      "Login with two step verification",
+      htmlContent,
+    );
+    return user;
+  }
+  if (user.isDeleted) {
+    await userRepo.updateUserByEmail(email, { isDeleted: false });
   }
   const accessToken = generateAccessToken({
     id: user._id,
@@ -115,7 +119,7 @@ export async function login(email, password) {
     toSeconds(7, "days"),
   );
 
-  return { accessToken, refreshToken };
+  return { user, tokens: { accessToken, refreshToken } };
 }
 export async function verifyLoginCode(email, code) {
   const user = await authRepo.checkUserByEmail(email);
@@ -130,6 +134,9 @@ export async function verifyLoginCode(email, code) {
   if (code != cachedCode) {
     throw authErrors.wrongOtp;
   }
+  if (user.isDeleted) {
+    await userRepo.updateUserByEmail(email, { isDeleted: false });
+  }
   const accessToken = generateAccessToken({
     id: user._id,
     email: user.email,
@@ -138,14 +145,18 @@ export async function verifyLoginCode(email, code) {
   const refreshToken = generateRefreshToken({
     id: user._id,
   });
+  await cacheProvider.set(
+    `refreshToken:${user._id.toString()}`,
+    refreshToken,
+    toSeconds(7, "days"),
+  );
 
   await cacheProvider.del(`${login2FAKey}:${email}`);
 
-  return { accessToken, refreshToken };
+  return { user, tokens: { accessToken, refreshToken } };
 }
 export async function sendOtp(email) {
   const user = await authRepo.checkUserByEmail(email);
-  console.log(email);
 
   if (!user) {
     throw userErrors.userNotFound;
@@ -162,10 +173,11 @@ export async function sendOtp(email) {
   //   email: user.email,
   //   expiresAt: Date.now() + toMs(15, "minutes"),
   // });
-  // const htmlContent = getOtpEmailTemplate(code, "resend");
-  // // await sendEmail(user.email, "New OTP - NGL", htmlContent);
-  // await mailjetProvider.sendEmail(user.email, "New OTP - NGL", htmlContent);
+  const htmlContent = getOtpEmailTemplate(code, "resend");
+  // await sendEmail(user.email, "New OTP - NGL", htmlContent);
+  await mailjetProvider.sendEmail(user.email, "New OTP - NGL", htmlContent);
 }
+
 export async function resetPassword(email, code, newPassword) {
   const user = await authRepo.checkUserByEmail(email);
   if (!user) {
@@ -179,7 +191,8 @@ export async function resetPassword(email, code, newPassword) {
   if (!otp) {
     throw authErrors.otpExpired;
   }
-  if (+otp.code !== +code) {
+  if (+otp !== +code) {
+    console.log(otp, code);
     throw authErrors.wrongOtp;
   }
   const hashedPassword = await hashPassword(newPassword);
@@ -256,6 +269,7 @@ export async function enable2StepVerification(email) {
     throw new AppError("two step verification already enabled");
   }
   const code = generateOtp();
+  console.log(code);
   await cacheProvider.set(
     `${enable2FAKey}:${email}`,
     code,
@@ -288,7 +302,7 @@ export async function logout(refreshToken) {
     throw authErrors.refreshExpired;
   }
   const payload = verifyRefreshToken(refreshToken);
-  const user = await userRepo.findUserById(payload.id);
+  const user = await authRepo.checkUserById(payload.id);
   if (!user || !user.isVerified) {
     throw userErrors.userNotFound;
   }
@@ -300,7 +314,5 @@ export async function logout(refreshToken) {
     throw authErrors.tokenRevoked;
   }
 
-
-  await cacheProvider.del(
-    `refreshToken:${user._id.toString()}`);
+  await cacheProvider.del(`refreshToken:${user._id.toString()}`);
 }

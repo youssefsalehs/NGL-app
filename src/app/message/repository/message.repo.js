@@ -1,3 +1,4 @@
+import User from "../../user/model/user.model.js";
 import Message from "../model/message.model.js";
 
 export async function createMsg(data, sender, mediaFiles = []) {
@@ -23,7 +24,11 @@ export async function getAllMsgsForUser(userId, query) {
   const page = +query.page || 1;
   const limit = +query.limit || 10;
   const skip = (page - 1) * limit;
-  const msgs = await Message.find({ receiver: userId }, {}, { limit, skip });
+  const msgs = await Message.find(
+    { receiver: userId },
+    {},
+    { limit, skip },
+  ).populate("sender", "username profilePicture");
   const totalMsgs = await Message.countDocuments({
     receiver: userId,
     isDeleted: false,

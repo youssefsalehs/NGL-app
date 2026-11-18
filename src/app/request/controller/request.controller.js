@@ -3,11 +3,16 @@ import * as requestService from "../service/request.service.js";
 export async function getRequestsBySender(req, res, next) {
   try {
     const senderId = req.user.id;
-    const requests = await requestService.getRequestsBySender(senderId);
+    const query = req.query;
+    const { data, metaData } = await requestService.getRequestsBySender(
+      senderId,
+      query,
+    );
 
     return res.status(200).json({
       success: true,
-      data: requests,
+      data,
+      metaData,
     });
   } catch (error) {
     return next(error);
@@ -16,14 +21,13 @@ export async function getRequestsBySender(req, res, next) {
 
 export async function createRequest(req, res, next) {
   try {
-    const { messageId } = req.body;
+    const { msgId } = req.params;
     const receiverId = req.user.id;
-    const request = await requestService.createRequest(receiverId, messageId);
+    await requestService.createRequest(receiverId, msgId);
 
     return res.status(201).json({
       success: true,
       message: "identity request created",
-      data: request,
     });
   } catch (error) {
     return next(error);
@@ -50,11 +54,16 @@ export async function updateRequestStatus(req, res, next) {
 export async function getRequestsByReceiver(req, res, next) {
   try {
     const receiverId = req.user.id;
-    const requests = await requestService.getRequestsByReceiver(receiverId);
+    const query = req.query;
+    const { data, metaData } = await requestService.getRequestsByReceiver(
+      receiverId,
+      query,
+    );
 
     return res.status(200).json({
       success: true,
-      data: requests,
+      data,
+      metaData,
     });
   } catch (error) {
     return next(error);

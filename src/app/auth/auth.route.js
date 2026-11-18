@@ -6,28 +6,13 @@ import { guard } from "../../lib/auth/guard.js";
 import loginFailLimiter from "../../lib/limiter/loginFailLimiter.js";
 const authRouter = Router();
 const loginLimiter = loginFailLimiter();
-authRouter.get(
-  "/me",
-  guard,
-  authController.getMe,
-);
-authRouter.post(
-  "/register",
-  authController.register,
-);
-authRouter.patch(
-  "/verify",
-  idempotency(toSeconds(3, "minutes")),
-  authController.verifyAccount,
-);
+authRouter.get("/me", guard, authController.getMe);
+authRouter.post("/register", authController.register);
+authRouter.patch("/verify", authController.verifyAccount);
 // endpoints belong to ordinar login or two step verification login
 authRouter.post("/login", loginLimiter, authController.login);
 authRouter.post("/logout", authController.logout);
-authRouter.post(
-  "/verify-login",
-  idempotency(toSeconds(3, "minutes")),
-  authController.verifyLoginCode,
-);
+authRouter.post("/verify-login", authController.verifyLoginCode);
 
 authRouter.post("/refresh", authController.refresh);
 authRouter.post(
@@ -35,6 +20,7 @@ authRouter.post(
   idempotency(toSeconds(15, "minutes")),
   authController.sendOtp,
 );
+
 authRouter.patch(
   "/reset-password",
   idempotency(toSeconds(3, "minutes")),
@@ -49,7 +35,6 @@ authRouter.post(
 );
 authRouter.post(
   "/verify-code-enable-2-step-verification",
-  idempotency(toSeconds(3, "minutes")),
   authController.verifyEnable2StepVerification,
 );
 

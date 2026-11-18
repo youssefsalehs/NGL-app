@@ -11,7 +11,6 @@ export async function createMsg(req, res, next) {
     return res.status(201).json({
       success: true,
       message: "msg is created successfully",
-      data: msg,
     });
   } catch (error) {
     return next(error);

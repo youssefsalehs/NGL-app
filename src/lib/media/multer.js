@@ -10,12 +10,7 @@ export const upload = (allowedTypes = allowedFields.images) =>
       }
       cb(null, true);
     },
-    storage: diskStorage({
-      destination: "uploads",
-      filename: function (req, file, cb) {
-        cb(null, `${crypto.randomUUID()}-${file.originalname}`);
-      },
-    }),
+    storage: diskStorage({}),
   });
 
 export const uploadSingleFile = (

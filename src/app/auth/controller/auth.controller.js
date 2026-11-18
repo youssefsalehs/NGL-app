@@ -1,6 +1,7 @@
 import { validate } from "../../../lib/validation/validation.js";
 import {
   enable2StepVerificationDto,
+  forgotPasswordDto,
   loginDto,
   registerDto,
   resetPasswordDto,
@@ -11,15 +12,15 @@ import {
 } from "../dto/auth.dto.js";
 import * as authService from "../service/auth.service.js";
 import generateTokens from "../utils/generateTokens.js";
-export async function getMe(req, res, next){
+export async function getMe(req, res, next) {
   try {
     const user = req.user;
     return res.status(200).json({
       success: true,
-      data:user
-    })
+      data: user,
+    });
   } catch (error) {
-    return next(error)
+    return next(error);
   }
 }
 export async function register(req, res, next) {
@@ -40,11 +41,11 @@ export async function verifyAccount(req, res, next) {
   try {
     const data = validate(verifyAccountDto, req.body);
     const { email, code } = data;
-    const updatedUser = await authService.verifyAccount(email, code);
+    await authService.verifyAccount(email, code);
 
     return res.status(200).json({
       success: true,
-      message: "user verified successfully"
+      message: "user verified successfully",
     });
   } catch (error) {
     return next(error);
@@ -55,7 +56,7 @@ export async function login(req, res, next) {
   try {
     const data = validate(loginDto, req.body);
     const { email, password } = data;
-    const tokens = await authService.login(email, password);
+    const { user, tokens } = await authService.login(email, password);
     if (!tokens) {
       return res.status(200).json({
         success: true,
@@ -67,6 +68,7 @@ export async function login(req, res, next) {
     return res.status(200).json({
       success: true,
       message: "user logged in successfully",
+      data: user,
     });
   } catch (error) {
     return next(error);
@@ -77,8 +79,8 @@ export async function logout(req, res, next) {
     const refreshToken = req.cookies?.refresh_token;
     await authService.logout(refreshToken);
 
-    res.clearCookie("access_token", {  path:'/'});
-    res.clearCookie("refresh_token",{ path:'/api/v1/auth'});
+    res.clearCookie("access_token", { path: "/" });
+    res.clearCookie("refresh_token", { path: "/api/v1/auth" });
 
     return res.status(200).json({
       success: true,
@@ -92,14 +94,12 @@ export async function verifyLoginCode(req, res, next) {
   try {
     const data = validate(verifyLoginDto, req.body);
     const { email, code } = data;
-    const { accessToken, refreshToken } = await authService.verifyLoginCode(
-      email,
-      code,
-    );
-    generateTokens(res, accessToken, refreshToken);
+    const { user, tokens } = await authService.verifyLoginCode(email, code);
+    generateTokens(res, tokens.accessToken, tokens.refreshToken);
     return res.status(200).json({
       success: true,
       message: "user logged in  successfully",
+      data: user,
     });
   } catch (error) {
     return next(error);
@@ -119,6 +119,7 @@ export async function sendOtp(req, res, next) {
     return next(error);
   }
 }
+
 export async function resetPassword(req, res, next) {
   try {
     const data = validate(resetPasswordDto, req.body);

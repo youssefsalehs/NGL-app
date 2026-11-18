@@ -4,7 +4,7 @@ import { guard } from "../../lib/auth/guard.js";
 
 const requestRouter = Router();
 
-requestRouter.route("/").post(guard, requestController.createRequest);
+requestRouter.route("/:msgId").post(guard, requestController.createRequest);
 
 requestRouter
   .route("/sender")

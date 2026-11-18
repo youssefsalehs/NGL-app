@@ -2,72 +2,72 @@ import { AppError } from "../../../pkg/error/error.js";
 import * as msgErrors from "../../message/errors.js";
 import * as messageRepo from "../../message/repository/message.repo.js";
 import * as requestRepo from "../repository/request.repository.js";
-import * as conversationService from "../../conversation/service/conversation.service.js";
-import * as conversationRepo from "../../conversation/repository/conversation.repository.js";
-export const requestNotKnown = new AppError(
-  "message sender is not known.",
-  404,
-);
-
+import * as userErrors from "../../user/errors.js";
+import * as requestErrors from "../errors.js";
 export async function createRequest(receiverId, messageId) {
   const originalMessage = await messageRepo.getSpecificMsgById(messageId);
   if (!originalMessage || originalMessage.isDeleted) {
     throw msgErrors.messageNotFound;
   }
   if (!originalMessage.isAnonymous) {
-    throw new AppError("cannot send request for non-anonymous message.", 400);
+    throw msgErrors.anonymousMsg;
   }
   if (originalMessage.sender.toString() === receiverId.toString()) {
-    throw new AppError("cannot send request to yourself.", 400);
+    throw userErrors.userNotAuthorized;
   }
   const senderId = originalMessage.sender;
   if (!senderId) {
     throw requestNotKnown;
   }
-
-  const request = await requestRepo.createRequest({
+  const existingReq = await requestRepo.checkRequest(
     messageId,
+    originalMessage.sender,
+    originalMessage.receiver,
+  );
+  if (existingReq) {
+    throw requestErrors.requestAlreadyCreated;
+  }
+  const request = await requestRepo.createRequest({
+    message: messageId,
     receiver: receiverId,
     sender: senderId,
     status: "pending",
     isActive: true,
   });
+  await messageRepo.updateMsg(messageId, { hasRequestedReveal: true });
   request.sender = undefined;
   return request;
 }
 
-export async function getRequestsBySender(senderId) {
-  const requests = await requestRepo.getRequestsBySender(senderId);
-  return requests;
+export async function getRequestsBySender(senderId, query) {
+  const { data, metaData } = await requestRepo.getRequestsBySender(
+    senderId,
+    query,
+  );
+  return { data, metaData };
 }
 
 export async function updateRequestStatus(requestId, status) {
   const request = await requestRepo.getRequestById(requestId);
   if (!request) {
-    throw new AppError("request not found.", 404);
+    throw requestErrors.requestNotFound;
   }
   if (!request.isActive) {
-    throw new AppError("request is no longer active.", 400);
+    throw requestErrors.requestNoLongerActive;
   }
   const updated = await requestRepo.updateRequestStatus(requestId, {
     status,
   });
-  if (updated.status == "accepted") {
-    const conversation = await conversationService.createConversation(
-      request.sender,
-      request.receiver,
-    );
-    await conversationRepo.addNewMessageToConversation(
-      conversation._id,
-      request.messageId,
-    );
-  }
+
   return updated;
 }
 
-export async function getRequestsByReceiver(receiverId) {
-  const requests = await requestRepo.getRequestsByReceiver(receiverId);
-  const filteredRequests = requests.map((request) => {
+export async function getRequestsByReceiver(receiverId, query) {
+  const { data, metaData } = await requestRepo.getRequestsByReceiver(
+    receiverId,
+    query,
+  );
+  const filteredRequests = data.map((request) => {
     if (
       request.isActive ||
       (request.status == "rejected" && request.isActive === false)
@@ -76,18 +76,18 @@ export async function getRequestsByReceiver(receiverId) {
     }
     return request;
   });
-  return filteredRequests;
+  return { data: filteredRequests, metaData };
 }
 export async function getRequestById(requestId, userId) {
   const request = await requestRepo.getRequestById(requestId);
   if (!request) {
-    throw new AppError("request not found.", 404);
+    throw requestErrors.requestNotFound;
   }
   if (
     request.receiver.toString() !== userId.toString() &&
     request.sender.toString() !== userId.toString()
   ) {
-    throw new AppError("you are not authorized to view this request.", 403);
+    throw userErrors.userNotAuthorized;
   }
   if (
     !request.isActive &&

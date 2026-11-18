@@ -17,3 +17,10 @@ export async function findUserById(id) {
 export async function getAllUsers() {
   return User.find({ isDeleted: false }, { password: 0 });
 }
+
+export async function findUserByUsername(username) {
+  return User.findOne(
+    { username: username, isDeleted: false },
+    { password: 0 },
+  );
+}

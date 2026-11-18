@@ -35,4 +35,15 @@ userRouter.post(
   fileValidation(),
   userController.uploadCoverPicture,
 );
+userRouter.delete(
+  "/delete-profile-picture",
+  guard,
+  userController.deleteProfilePicture,
+);
+userRouter.delete(
+  "/delete-cover-picture",
+  guard,
+  userController.deleteCoverPicture,
+);
+userRouter.get("/:username", userController.getUserByUsername);
 export { userRouter };

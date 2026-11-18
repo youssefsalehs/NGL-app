@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 const requestSchema = new Schema(
   {
-    messageId: {
+    message: {
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Message",

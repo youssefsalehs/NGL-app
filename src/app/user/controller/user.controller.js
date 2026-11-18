@@ -1,6 +1,10 @@
 import { validate } from "../../../lib/validation/validation.js";
 import * as userService from "../service/user.service.js";
-import { updatePasswordDto, updateUserDto } from "../dto/user.dto.js";
+import {
+  getByUsernameDto,
+  updatePasswordDto,
+  updateUserDto,
+} from "../dto/user.dto.js";
 export async function getMe(req, res, next) {
   try {
     const user = await userService.getMe(req.user.email);
@@ -59,9 +63,7 @@ export async function getAllUsers(req, res, next) {
 export async function uploadProfilePicture(req, res, next) {
   try {
     const userId = req.user.id;
-    const filePath = req.file.path;
-
-    await userService.uploadProfilePicture(userId, filePath);
+    await userService.uploadProfilePicture(req.file, userId);
     return res.status(200).json({
       success: true,
       message: "profile picture uploaded successfully",
@@ -73,11 +75,41 @@ export async function uploadProfilePicture(req, res, next) {
 export async function uploadCoverPicture(req, res, next) {
   try {
     const userId = req.user.id;
-    const filePath = req.file.path;
-    await userService.uploadCoverPicture(userId, filePath);
+    await userService.uploadCoverPicture(req.file, userId);
     return res.status(200).json({
       success: true,
       message: "cover picture uploaded successfully",
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function deleteProfilePicture(req, res, next) {
+  try {
+    const userId = req.user.id;
+    await userService.deleteProfilePicture(userId);
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function deleteCoverPicture(req, res, next) {
+  try {
+    const userId = req.user.id;
+    console.log(userId);
+    await userService.deleteCoverPicture(userId);
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+}
+export async function getUserByUsername(req, res, next) {
+  try {
+    const { username } = validate(getByUsernameDto, req.params);
+    const user = await userService.getUserByUsername(username);
+    return res.status(200).json({
+      success: true,
+      data: user,
     });
   } catch (error) {
     return next(error);

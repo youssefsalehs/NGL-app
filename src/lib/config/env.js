@@ -18,6 +18,9 @@ const schema = z.object({
   MAILJET_SECRET_KEY: z.string(),
   MAILJET_FROM_EMAIL: z.string().trim().toLowerCase(),
   MAILJET_FROM_NAME: z.string(),
+  CLOUDINARY_API_KEY: z.string(),
+  CLOUDINARY_API_SECRET: z.string(),
+  CLOUDINARY_CLOUD_NAME: z.string(),
 });
 
 const parsed = schema.parse(process.env);
@@ -49,6 +52,11 @@ export const env = {
   jwt: {
     accessSecret: parsed.JWT_Access_SECRET,
     refreshSecret: parsed.JWT_Refresh_SECRET,
+  },
+  cloudinary: {
+    cloudName: parsed.CLOUDINARY_CLOUD_NAME,
+    apiKey: parsed.CLOUDINARY_API_KEY,
+    apiSecret: parsed.CLOUDINARY_API_SECRET,
   },
   port: Number(parsed.PORT),
 };
