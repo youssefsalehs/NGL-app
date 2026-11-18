@@ -6,13 +6,18 @@ import globalErrorHandler from "./lib/error/error.handler.js";
 import router from "./route.js";
 import { correlationId } from "./lib/correlation/correlationId.js";
 import { AppError } from "./pkg/error/error.js";
+import { env } from "./lib/config/env.js";
 
 export function createApp() {
   const app = express();
   app.use(cookieParser());
   app.use(
     cors({
-      origin: ["http://localhost:4200", "http://localhost:5173"],
+      origin: [
+        "http://localhost:4200",
+        "http://localhost:5173",
+        env.frontend.url,
+      ],
       credentials: true,
     }),
   );
