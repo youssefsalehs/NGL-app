@@ -22,6 +22,7 @@ const schema = z.object({
   CLOUDINARY_API_SECRET: z.string(),
   CLOUDINARY_CLOUD_NAME: z.string(),
   FRONTEND_URL: z.string(),
+  NODE_ENV: z.string(),
 });
 
 const parsed = schema.parse(process.env);
@@ -59,6 +60,7 @@ export const env = {
     apiKey: parsed.CLOUDINARY_API_KEY,
     apiSecret: parsed.CLOUDINARY_API_SECRET,
   },
+  env: parsed.NODE_ENV,
   port: Number(parsed.PORT),
   frontend: {
     url: parsed.FRONTEND_URL,
