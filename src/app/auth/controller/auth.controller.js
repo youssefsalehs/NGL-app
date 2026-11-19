@@ -11,7 +11,7 @@ import {
   verifyLoginDto,
 } from "../dto/auth.dto.js";
 import * as authService from "../service/auth.service.js";
-import generateTokens from "../utils/generateTokens.js";
+import generateTokens, { baseCookieOptions } from "../utils/generateTokens.js";
 export async function getMe(req, res, next) {
   try {
     const user = req.user;
@@ -79,8 +79,11 @@ export async function logout(req, res, next) {
     const refreshToken = req.cookies?.refresh_token;
     await authService.logout(refreshToken);
 
-    res.clearCookie("access_token", { path: "/" });
-    res.clearCookie("refresh_token", { path: "/api/v1/auth" });
+    res.clearCookie("access_token", { ...baseCookieOptions, path: "/" });
+    res.clearCookie("refresh_token", {
+      ...baseCookieOptions,
+      path: "/api/v1/auth",
+    });
 
     return res.status(200).json({
       success: true,

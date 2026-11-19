@@ -2,7 +2,7 @@ import { toMs } from "../../../pkg/utils/time.js";
 
 const isProd = process.env.NODE_ENV === "production";
 
-const baseCookieOptions = {
+export const baseCookieOptions = {
   httpOnly: true,
   secure: isProd,
   sameSite: "none",
